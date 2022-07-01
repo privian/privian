@@ -1,0 +1,33 @@
+version: "3"
+
+services:
+  redis:
+    image: redis:6.2
+    restart: always
+    command: redis-server --loglevel warning
+    volumes:
+      - redis_data:/data
+    ports:
+      - ${PORT_REDIS:-6379}:6379
+
+  app:
+    build: ./
+    restart: always
+    depends_on:
+      - redis
+    links: 
+      - redis
+    environment:
+      - NODE_ENV=production
+      - PRIVIAN_REDIS_URL=redis://redis:6379
+      - PRIVIAN_BING_API_KEY
+    volumes:
+      - app_data:/data
+    ports:
+      - ${PORT_APP:-3000}:3000
+
+volumes:
+  app_data:
+    driver: local
+  redis_data:
+    driver: local

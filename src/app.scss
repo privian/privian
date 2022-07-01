@@ -1,0 +1,214 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+	--bg-active: hsl(var(--p) / 0.04);
+	--btn-text-case: none;
+	--rounded-btn: 0.25rem;
+	--rounded-box: 0.25rem;
+	--tab-border: 0px;
+}
+
+[data-theme="lofi"] {
+	--p: 216 98% 52%;
+	--n: 0 0% 40%;
+}
+
+[data-theme="light"] {
+	--n: 0 0% 40%;
+}
+
+html {
+	font-size: 16px;
+}
+
+a {
+	color: hsl(var(--p));
+}
+
+progress::-webkit-progress-value {
+	transition: 0.5s width;
+}
+
+*[contenteditable="true"] {
+	border-radius: 0.1rem;
+
+	&[data-placeholder]:empty:before{
+		content: attr(data-placeholder);
+		opacity: 0.6;
+	}
+
+	&:not(:focus) {
+		cursor: pointer;
+	}
+
+	&:focus {
+		outline: 1px dotted hsl(var(--p));
+		outline-offset: 1px;
+	}
+}
+
+ul {
+	li.task-list-item {
+		list-style: none;
+
+		input[type="checkbox"] {
+			margin-right: 0.5rem;
+			margin-left: -1.65rem;
+			vertical-align: text-bottom;
+		}
+	}
+}
+
+.checkbox.animate-none:checked, .checkbox.animate-none[checked="true"] {
+	animation: none !important;
+}
+
+.no-underline {
+	text-decoration-line: none !important;
+}
+
+.link {
+	&:not(.link-primary):not(.link-secondary):visited {
+		color: hsl(var(--s));
+	}
+}
+
+.btn {
+	font-weight: 400;
+}
+
+.btn-link:not(.icon) {
+	text-decoration-line: underline;
+
+	&:hover {
+		text-decoration-line: none;
+	}
+}
+
+.btn-link.icon {
+	> span {
+		text-decoration-line: underline;
+	}
+
+	&:hover {
+		text-decoration-line: none;
+
+		> span {
+			text-decoration-line: none;
+		}
+	}
+}
+
+.border-b {
+	--tw-border-opacity: 0.2;
+	border-color: hsl(var(--bc) / var(--tw-border-opacity));
+}
+
+.input,
+.select {
+	font-weight: inherit;
+	height: 2.65rem;
+	min-height: auto;
+}
+
+.textarea {
+	font-weight: inherit;
+	min-height: auto;
+}
+
+.input:not(:focus):not(.input-error),
+.textarea:not(:focus):not(.textarea-error),
+.select:not(:focus):not(.select-error) {
+	border-color: hsl(var(--n));
+}
+
+.input:focus,
+.textarea:focus,
+.select:focus {
+	border-color: hsl(var(--p));
+	outline-width: 0;
+	outline-offset: 0;
+}
+
+.label {
+	padding-bottom: 0.25rem;
+	padding-left: 0;
+	padding-right: 0;
+}
+
+.menu :where(li:not(.menu-title):not(:empty)) > :where(*:not(ul):focus), .menu :where(li:not(.menu-title):not(:empty)) > :where(*:not(ul):hover) {
+	background-color: var(--bg-active);
+}
+
+.menu .focus {
+	background-color: var(--bg-active);
+}
+
+.table :where(thead, tfoot) :where(th, td) {
+	font-weight: normal;
+	text-transform: none;
+}
+
+.table :where(:first-child) :where(:first-child) :where(th, td):first-child {
+	border-top-left-radius: 0.25rem;
+	border-bottom-left-radius: 0.25rem;
+}
+
+.table :where(:first-child) :where(:first-child) :where(th, td):last-child {
+	border-top-right-radius: 0.25rem;
+	border-bottom-right-radius: 0.25rem;
+}
+
+.table :where(thead, tbody) :where(th) input  {
+	margin-top: 4px;
+}
+
+.menu .menu-title > * {
+	font-size: 0.85rem;
+	font-weight: inherit;
+	padding-bottom: 0.5rem;
+	padding-top: 0.5rem;
+}
+
+.prose :where(code):not(:where([class~="not-prose"] *)) {
+	padding-left: 0;
+	padding-right: 0;
+}
+
+.radial-progress-none:before,
+.radial-progress-none:after {
+	display: none;
+}
+
+.progress-rainbow {
+	width: 100%;
+	height: 1px;
+	overflow: hidden;
+	
+	&-bar {
+		display: block;
+		height: 100%;
+		background: linear-gradient(90deg, hsl(var(--p)) 15%, #fff, 60%, hsl(var(--s)));
+		background-size: 300% 100%;
+		animation: privian-progress-animation 2s linear infinite;
+		animation-delay: 100ms;
+		opacity: 0;
+		width: 100%;
+	}
+}
+
+@keyframes privian-progress-animation {
+  0% {
+    background-position: 100%;
+		opacity: 0;
+	}
+	1% {
+		opacity: 1;
+	}
+  100% {
+    background-position: 0;
+		opacity: 1;
+	}
+}

@@ -1,0 +1,43 @@
+{
+	"apis": [],
+	"bangs": {
+		"add": null,
+		"blacklist": null,
+		"enable": true,
+		"whitelist": null
+	},
+	"bing": {
+		"apiKey": ""
+	},
+	"jwt": {
+		"cookieName": "privian_jwt",
+		"secret": ""
+	},
+	"providers": {
+		"disable": [],
+		"preview": [
+			"Imdb",
+			"Mdn",
+			"StackOverflow",
+			"Wikipedia"
+		],
+		"search": [
+			"BingApi",
+			"Calculator",
+			"Currency"
+		],
+		"suggestions": [
+			"Google"
+		]
+	},
+	"puppeteer": {
+		"executablePath": ""
+	},
+	"redis": {
+		"cache": {
+			"brotli": true,
+			"hashKey": true
+		},
+		"url": ""
+	}
+}

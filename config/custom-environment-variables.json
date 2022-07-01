@@ -1,0 +1,29 @@
+{
+	"bing": {
+		"apiKey": "PRIVIAN_BING_API_KEY"
+	},
+	"providers": {
+		"disable": {
+			"__name": "PRIVIAN_PROVIDERS_DISABLE",
+			"__format": "json"
+		},
+		"preview": {
+			"__name": "PRIVIAN_PROVIDERS_PREVIEW",
+			"__format": "json"
+		},
+		"search": {
+			"__name": "PRIVIAN_PROVIDERS_SEARCH",
+			"__format": "json"
+		},
+		"suggestions":{
+			"__name": "PRIVIAN_PROVIDERS_SUGGESTIONS",
+			"__format": "json"
+		}
+	},
+	"puppeteer": {
+		"executablePath": "PRIVIAN_PUPPETEER_EXECUTABLE_PATH"
+	},
+	"redis": {
+		"url": "PRIVIAN_REDIS_URL"
+	}
+}

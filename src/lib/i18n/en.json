@@ -1,0 +1,51 @@
+{
+	"action": {
+		"cancel": "Cancel",
+		"change_icon": "Change icon",
+		"continue_with": "Continue with {provider}",
+		"close": "Close",
+		"edit": "Edit",
+		"delete": "Delete",
+		"log_in": "Log in",
+		"more": "More",
+		"pin": "Pin",
+		"reset_password": "Reset password",
+		"save": "Save"
+	},
+	"label": {
+		"change_icon":"Change icon",
+		"color": "Color",
+		"email": "Email",
+		"history": "History",
+		"images": "Images",
+		"language": "Language",
+		"length": "Length",
+		"log_in_with_email": "Log in with email",
+		"news": "News",
+		"or": "or",
+		"password": "Password",
+		"preview": "Preview",
+		"preview_in_modal": "Preview in modal window",
+		"privacy_score": "Privacy score",
+		"record_history": "Record history",
+		"region": "Region",
+		"related_to": "Related to {term}",
+		"result_info": "Result info",
+		"safe_search": "Safe search",
+		"settings": "Settings",
+		"sort": "Sort",
+		"size": "Size",
+		"suggestions": "Suggestions",
+		"theme": "Theme",
+		"time": "Time",
+		"trending": "Trending",
+		"type": "Type",
+		"videos": "Videos",
+		"web": "Web"
+	},
+	"placeholder": {
+		"email": "Email",
+		"search": "Search",
+		"start_typing": "Start typing..."
+	}
+}
