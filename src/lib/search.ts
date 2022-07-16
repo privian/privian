@@ -5,7 +5,7 @@ import { Preview } from '$lib/preview';
 import { Providers } from '$lib/providers';
 import { Rating } from '$lib/rating';
 import { sanitizeDeep } from '$lib/sanitizer';
-import { BadRequestError } from '$lib/api/errors';
+import { BadRequestError } from '$lib/errors';
 import type { ISearchQuery, ISearchResult, ISearchOptions } from '$lib/types';
 
 export class Search {
@@ -25,7 +25,8 @@ export class Search {
 		};
 		if (query.command) {
 			try {
-				result = await Commands.handle(query.command!, locals);
+				result = await Commands.invoke(query.command!, locals);
+				console.log(result)
 			} catch (err) {
 				if (err instanceof BadRequestError) {
 					result = {

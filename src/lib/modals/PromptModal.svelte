@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { _ } from 'svelte-i18n';
 	import Modal from '$lib/components/Modal.svelte';
 	import { prompt } from '$lib/stores';
 
@@ -25,7 +26,7 @@
 	</div>
 
 	<div slot="actions">
-		<button class="btn btn-ghost px-8 rounded-none" on:click={() => onCancelClick()}>Cancel</button>
-		<button class="btn btn-primary px-8 rounded-none flex-inline gap-3" on:click={() => onConfirmClick()}>Confirm</button>
+		<button class="btn btn-ghost px-8 rounded-none" on:click={() => onCancelClick()}>{$_('action.cancel')}</button>
+		<button class="btn btn-primary px-8 rounded-none flex-inline gap-3" on:click={() => onConfirmClick()}>{$_('action.confirm')}</button>
 	</div>
 </Modal>

@@ -119,7 +119,7 @@
 							{#if item.privacyScore}
 								<PrivacyScore score={item.privacyScore} iconOnly />
 							{/if}
-							<a href={item.link} title={item.link} class="text-ellipsis overflow-hidden" class:text-success={!privacyRisk} class:opacity-80={privacyRisk}>
+							<a href={item.link} title={item.link} class="text-ellipsis overflow-hidden max-w-lg" class:text-success={!privacyRisk} class:opacity-80={privacyRisk}>
 								{decodeURIComponent(item.link)}
 							</a>
 					</div>

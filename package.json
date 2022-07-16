@@ -10,7 +10,7 @@
     "url": "https://about.privian.io"
   },
   "license": "Apache-2.0",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "scripts": {
     "dev": "svelte-kit dev",
     "build": "svelte-kit build",
@@ -64,10 +64,10 @@
     "cron-parser": "^4.4.0",
     "entities": "^4.3.0",
     "fast-xml-parser": "^4.0.8",
-    "graphql-request": "^4.2.0",
     "idb-keyval": "^6.1.0",
     "intl-parse-accept-language": "^1.0.0",
     "jsonwebtoken": "^8.5.1",
+    "just-extend": "^6.0.1",
     "lru-cache": "^7.10.1",
     "marked": "^4.0.17",
     "mathjax": "^3.2.1",

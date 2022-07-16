@@ -13,10 +13,11 @@ export class Wikipedia {
 			snippets: 'h3, h4, h5, p, ul, ol, pre',
 			maxSections: 1,
 			maxSnippets: 3,
-			ignore: '.ambox, .infobox, .nomobile, .sidebar, .toc, #coordinates',
+			ignore: '.ambox, .infobox, .nomobile, .sidebar, .toc',
 			root: ($) => {
 				$('.mw-editsection').remove(); // remove [edit] links
 				$('sup > a').parent().remove(); // remove foot note links
+				$('#coordinates').remove(); // remove geo coordinates
 				return $.root();
 			},
 			stops: 'h1, h2',

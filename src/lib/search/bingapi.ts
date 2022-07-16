@@ -1,6 +1,6 @@
 import duration from 'parse-duration';
 import { Cache } from '$lib/cache';
-import { BadRequestError } from '$lib/api/errors';
+import { BadRequestError } from '$lib/errors';
 import { formatTimeAgo } from '$lib/format';
 import { request } from '$lib/helpers';
 import { i18n } from '$lib/i18n';
@@ -176,14 +176,16 @@ export class BingApi {
 		}
 		let items = await this.cacheSuggestions.get([locals.locale, query.term]);
 		if (!items) {
-			const resp = await request(this.URL_SUGGESTIONS, {
-				mkt: locals.locale,
-				q: query.term,
-				textFormat: 'html',
-			}, {
+			const resp = await request({
 				headers: {
 					'Ocp-Apim-Subscription-Key': this.API_KEY,
 				},
+				searchParams: {
+					mkt: locals.locale,
+					q: query.term,
+					textFormat: 'html',
+				},
+				url: this.URL_SUGGESTIONS,
 			});
 			const data: IBingSuggestionsResult = await resp.json();
 			if (resp.status !== 200) {
@@ -254,16 +256,18 @@ export class BingApi {
 
 	static async searchWeb(query: ISearchQuery, _result: ISearchResult, options: ISearchOptions, locals: App.Locals, _scope: Record<string, any>): Promise<Partial<ISearchResult>> {
 		const categories = await this.getCategories(locals.locale);
-		const resp = await request(this.URL_SEARCH_WEB, {
-			count: '50',
-			mkt: locals.region,
-			q: query.term,
-			textFormat: 'html',
-			...options?.filter,
-		}, {
+		const resp = await request({
 			headers: {
 				'Ocp-Apim-Subscription-Key': this.API_KEY,
 			},
+			searchParams: {
+				count: '50',
+				mkt: locals.region,
+				q: query.term,
+				textFormat: 'html',
+				...options?.filter,
+			},
+			url: this.URL_SEARCH_WEB,
 		});
 		const data: IBingSearchResponse = await resp.json();
 		let items: ISearchResultItem[] = [];
@@ -361,15 +365,17 @@ export class BingApi {
 	}
 
 	static async searchImages(query: ISearchQuery, _result: ISearchResult, options: ISearchOptions, locals: App.Locals, _scope: Record<string, any>): Promise<Partial<ISearchResult>> {
-		const resp = await request(this.URL_SEARCH_IMAGES, {
-			count: '100',
-			mkt: locals.region,
-			q: query.term,
-			...options?.filter,
-		}, {
+		const resp = await request({
 			headers: {
 				'Ocp-Apim-Subscription-Key': this.API_KEY,
 			},
+			searchParams: {
+				count: '100',
+				mkt: locals.region,
+				q: query.term,
+				...options?.filter,
+			},
+			url: this.URL_SEARCH_IMAGES,
 		});
 		const data = await resp.json();
 		if (resp.status !== 200) {
@@ -394,16 +400,18 @@ export class BingApi {
 	}
 
 	static async searchNews(query: ISearchQuery, _result: ISearchResult, options: ISearchOptions, locals: App.Locals, _scope: Record<string, any>): Promise<Partial<ISearchResult>> {
-		const resp = await request(this.URL_SEARCH_NEWS, {
-			count: '50',
-			mkt: locals.region,
-			q: query.term,
-			textFormat: 'html',
-			...options?.filter,
-		}, {
+		const resp = await request({
 			headers: {
 				'Ocp-Apim-Subscription-Key': this.API_KEY,
 			},
+			searchParams: {
+				count: '50',
+				mkt: locals.region,
+				q: query.term,
+				textFormat: 'html',
+				...options?.filter,
+			},
+			url: this.URL_SEARCH_NEWS,
 		});
 		const data = await resp.json();
 		if (resp.status !== 200) {
@@ -424,16 +432,18 @@ export class BingApi {
 	}
 
 	static async searchVideos(query: ISearchQuery, _result: ISearchResult, options: ISearchOptions, locals: App.Locals, _scope: Record<string, any>): Promise<Partial<ISearchResult>> {
-		const resp = await request(this.URL_SEARCH_VIDEOS, {
-			count: '100',
-			mkt: locals.region,
-			q: query.term,
-			textFormat: 'html',
-			...options?.filter,
-		}, {
+		const resp = await request({
 			headers: {
 				'Ocp-Apim-Subscription-Key': this.API_KEY,
 			},
+			searchParams: {
+				count: '100',
+				mkt: locals.region,
+				q: query.term,
+				textFormat: 'html',
+				...options?.filter,
+			},
+			url: this.URL_SEARCH_VIDEOS,
 		});
 		const data = await resp.json();
 		if (resp.status !== 200) {

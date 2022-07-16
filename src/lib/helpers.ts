@@ -1,8 +1,9 @@
 import type { RequestEvent } from '@sveltejs/kit';
 import { writable, type Writable } from 'svelte/store';
 import type { z } from 'zod';
-import { serialize } from 'cookie';
-import { ValidationError } from '$lib/api/errors';
+import extend from 'just-extend';
+import { AlreadyExistsError, ApiError, NotFoundError, ValidationError } from '$lib/errors';
+import type { IRequestOptions } from '$lib/types';
 
 const injectScriptPromises = new Map<string, Promise<unknown>>();
 
@@ -84,16 +85,16 @@ export function errorToJSON(err: any) {
 	}
 }
 
-export function handleRequest<TData = unknown>(fn: (ev: RequestEvent, data: TData, isHXR: boolean) => Promise<{ status?: number, body?: any, headers?: Record<string, string>}>, input?: z.ZodObject<any>) {
+export function handleRequest<TData = unknown>(fn: (ev: RequestEvent, data: TData, isHXR: boolean) => Promise<{ status?: number, body?: any, headers?: Record<string, string>}>, options?: { input?: z.ZodObject<any>, readBody?: boolean }) {
 	return async (ev: RequestEvent): Promise<{ status?: number, body?: any, headers?: Record<string, string>}> => {
 		const isXHR = ev.request.headers.get('sec-fetch-mode') === 'cors';
-		let data = await readRequestBody(ev.request);
+		let data = options?.readBody !== false ? await readRequestBody(ev.request) : null;
 		let result;
 		try {
 			// data validation
-			if (input?.parse) {
+			if (options?.input?.parse) {
 				try {
-					data = input.parse(data);
+					data = options.input.parse(data);
 				} catch (err) {
 					// @ts-ignore
 					throw new ValidationError(err?.issues);
@@ -178,45 +179,81 @@ export function setCookie(name: string, value: string, ttl?: number, path?: stri
 	document.cookie = createCookie(name, value, ttl, path);
 }
 
-export async function request(url: string, data?: unknown, options?: { method?: string, cookies?: Record<string, string>, headers?: Record<string, string>, userAgent?: string, timeout?: number }): Promise<Response> {
-	options = Object.assign({
+export async function request(options: IRequestOptions) {
+	options = extend(true, {
+		headers: {
+			'Cookie': options.cookies ? Object.entries(options.cookies).map(([ name, value ]) => `${name}=${value}`).join('; ') : void 0,
+			'User-Agent': `privian/${process.env.package_version}`,
+		},
 		method: 'GET',
 		timeout: 10000,
-		userAgent: 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/101.0.4951.41 Safari/537.36',
-	}, options);
+	}, options) as IRequestOptions;
 	const controller = new AbortController();
 	const timeout = setTimeout(() => controller.abort(), options.timeout);
-	const headers: Record<string, string | undefined> = {
-		'Cookie': options.cookies ? Object.entries(options.cookies).map(([ name, value ]) => `${name}=${value}`).join('; ') : void 0,
-		'User-Agent': options.userAgent!,
-		...options.headers,
-	};
-	if (options.method !== 'GET' && data) {
-		headers['Content-Type'] = 'application/json';
-	}
-	if (options.method === 'GET' && data && typeof data === 'object') {
-		const urlObject = new URL(url);
-		if (data instanceof URLSearchParams) {
-			urlObject.search = data.toString();
+	const url = new URL(options.url);
+	if (options.searchParams instanceof URLSearchParams) {
+		url.search = options.searchParams.toString();
 
-		} else if (typeof data === 'object') {
-			for (let key in data) {
-				// @ts-ignore
-				urlObject.searchParams.set(key, String(data[key]));
-			}
+	} else if (options.searchParams) {
+		for (let key in options.searchParams) {
+			url.searchParams.set(key, String(options.searchParams[key]));
 		}
-		url = urlObject.toString();
+	}
+	let body: any = void 0;
+	if (options.body && options.method !== 'GET') {
+		body = options.body;
+		if (typeof body === 'object' && (!options.headers!['Content-Type'] || options.headers!['Content-Type'].includes('application/json'))) {
+			if (!options.headers!['Content-Type']) {
+				options.headers!['Content-Type'] = 'application/json';
+			}
+			body = JSON.stringify(body);
+		}
 	}
 	const resp = await fetch(url, {
-		body: options.method !== 'GET' && data ? JSON.stringify(data) : void 0,
+		body,
 		credentials: 'omit',
-		headers: Object.fromEntries(Object.entries(headers).filter(([ name, value ]) => !!name && !!value)) as Record<string, string>,
+		headers: Object.fromEntries(Object.entries(options.headers!).filter(([ name, value ]) => !!name && !!value)) as Record<string, string>,
+		method: options.method,
 		keepalive: true,
 		signal: controller.signal,
 	});
 	clearTimeout(timeout);
-	if (resp.status > 204) {
-		// throw new Error(`Request failed with status ${resp.status}`);
+	if (options.validateStatus !== false && resp.status > 204) {
+		await throwResponseError(resp);
 	}
 	return resp;
+}
+
+export async function readResponseBody(response: Response) {
+	if (response.status === 204) {
+		return null;
+	}	
+	let body: unknown = null;
+	try {
+		if (response.headers.get('content-type')?.includes('application/json')) {
+			body = await response.json();	
+		} else {
+			body = await response.text();
+		}
+	} catch (err: any) {
+		throw new Error(`Unable to read response body (${response.status}): ${err.message}`);
+	}
+	return body;
+}
+
+export async function throwResponseError(response: Response) {
+	let body: any = null;
+	try {
+		body = await readResponseBody(response);
+	} catch (err) {
+		// noop
+	}
+	switch (response.status) {
+		case 404:
+			throw new NotFoundError(body?.message);
+		case 409:
+			throw new AlreadyExistsError(body?.message);
+		default:
+			throw new ApiError(body?.message || `Request failed with status ${response.status}`);
+	}
 }

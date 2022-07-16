@@ -13,4 +13,6 @@ export const post = handleRequest<z.infer<typeof PostInput>>(async ({ locals }, 
       category: data.category,
     }),
   };
-}, PostInput);
+}, {
+  input: PostInput,
+});

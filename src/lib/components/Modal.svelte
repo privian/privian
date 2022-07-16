@@ -39,7 +39,7 @@
           {/if}
 
           {#if subtitle}
-          <div class="text-sm text-neutral">{subtitle}</div>
+          <div class="text-sm opacity-60">{subtitle}</div>
           {/if}
         </div>
 

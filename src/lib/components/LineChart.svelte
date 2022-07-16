@@ -1,50 +1,75 @@
 <script lang="ts">
-	import { Chart } from 'frappe-charts';
-	import { afterUpdate, onMount } from 'svelte';
+	import { AreaChart } from '@carbon/charts-svelte';
+	import '@carbon/charts/styles.min.css';
 
-	export let data: Array<Array<string | number>>;
-	export let height: number = 150;
+	interface IDataItem {
+		date?: string;
+		group?: string;
+		key?: string;
+		value?: number;
+	}
 
-	let chart: any;
-	let el: HTMLElement;
+	export let data: IDataItem[];
+	export let height: number = 120;
+	export let title: string | undefined = void 0;
+	export let tooltipFn: ((data: IDataItem[]) => string) | undefined = void 0;
 
-	afterUpdate(() => {
-		if (chart) {
-			chart.update(getData());
+	$: maxValue = Math.max(...data.map(({ value }) => value!));
+	$: minValue = Math.min(...data.map(({ value }) => value!));
+	$: normalizedData = data.map((item) => {
+		if (!item.group) {
+			item.group = 'Default';
 		}
+		return item;
 	});
-
-	onMount(() => {
-		init();
-	});
-
-	function getData() {
-		return {
-			labels: data.find((item) => item[0] === 'x')?.slice(1),
-			datasets: data.filter((item) => item[0] !== 'x').map((item) => {
-				return {
-					name: item[0],
-					values: item.slice(1),
-				};
-			}),
-		};
-	}
-
-	function init() {
-		chart = new Chart(el, {
-			data: getData(),
-			type: 'line',
-			height,
-			colors: ['green', 'blue', 'purple'],
-			axisOptions: {
-				xAxisMode: 'tick',
-				xIsSeries: 1
-			},
-			lineOptions: {
-				regionFill: 1,
-			},
-		});
-	}
 </script>
 
-<div bind:this={el} />
+<AreaChart
+	data={normalizedData}
+	options={{
+		"title": title,
+		"axes": {
+			"left": {
+				"visible": false,
+				"includeZero": false,
+				"mapsTo": "value",
+				"scaleType": "linear",
+				"domain": [
+					minValue,
+					maxValue,
+				]
+			},
+			"bottom": {
+				"scaleType": "time",
+				"mapsTo": "date",
+				"_visible": false,
+				"truncation": {
+					"type": "mid_line",
+					"threshold": 10,
+					"numCharacter": 14
+				},
+			}
+		},
+		"legend": {
+			"clickable": false,
+			"enabled": false,
+		},
+		"toolbar": {
+			"enabled": false
+		},
+		"tooltip": {
+			customHTML: tooltipFn,
+		},
+		"grid": {
+			"x": {
+				"enabled": false
+			}
+		},
+		"color": {
+			"scale": {
+				"Default": "green",
+			}
+		},
+		"height": `${height}px`
+	}}
+/>

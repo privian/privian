@@ -24,6 +24,8 @@ export class Brave {
 
 	static readonly RESULTS_PER_PAGE = 50;
 
+	static readonly USER_AGENT = `Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/101.0.4951.41 Safari/537.3`;
+
 	static readonly cacheSuggestions = new Cache<ISearchSuggestionsResultItem[]>({
 		lru: {
 			max: 500,
@@ -55,10 +57,16 @@ export class Brave {
 		}
 		let items = await this.cacheSuggestions.get([locals.locale, query.term]);
 		if (!items) {
-			const resp = await request(this.URL_SUGGESTIONS, {
-				source: 'web',
-				rich: true,
-				q: query.term,
+			const resp = await request({
+				headers: {
+					'User-Agent': this.USER_AGENT,
+				},
+				searchParams: {
+					source: 'web',
+					rich: 'true',
+					q: query.term,
+				},
+				url: this.URL_SUGGESTIONS,
 			});
 			const json = await resp.json();
 			items = (json[1] || [])
@@ -90,15 +98,20 @@ export class Brave {
 		const cacheKey = [locals.country, category, JSON.stringify(options?.filter || {}), query.term];
 		let result = await this.cacheResults.get(cacheKey);
 		if (!result) {
-			const resp = await request(url.toString(), {
-				source: 'web',
-				q: query.term,
-				...options?.filter,
-			}, {
+			const resp = await request({
 				cookies: {
 					'country': locals.country.toLowerCase(),
 					'safesearch': locals.safeSearch ? 'strict' : 'off',
 				},
+				headers: {
+					'User-Agent': this.USER_AGENT,
+				},
+				searchParams: {
+					source: 'web',
+					q: query.term,
+					...options?.filter,
+				},
+				url: url.toString(),
 			});
 			switch (category) {
 				case categories.images:

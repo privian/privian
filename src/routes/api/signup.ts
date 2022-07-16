@@ -11,4 +11,6 @@ export const post = handleRequest<z.infer<typeof PostInput>>(async (_, data) => 
   return {
     status: 204,
   };
-}, PostInput);
+}, {
+  input: PostInput,
+});

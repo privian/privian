@@ -132,10 +132,19 @@ ul {
 	outline-offset: 0;
 }
 
+.input:read-only {
+	background-color: hsl(var(--bc) / 0.035);
+	color: hsl(var(--bc) / 0.7);
+}
+
 .label {
 	padding-bottom: 0.25rem;
 	padding-left: 0;
 	padding-right: 0;
+}
+
+.form-control + .form-control {
+	margin-top: 0.75rem;
 }
 
 .menu :where(li:not(.menu-title):not(:empty)) > :where(*:not(ul):focus), .menu :where(li:not(.menu-title):not(:empty)) > :where(*:not(ul):hover) {
@@ -197,6 +206,14 @@ ul {
 		opacity: 0;
 		width: 100%;
 	}
+}
+
+// carbon charts
+.cds--cc--grid rect.chart-grid-backdrop.stroked {
+	stroke: none;
+}
+.cds--cc--axes .chart-grid-backdrop .tick {
+	opacity: 0.5;
 }
 
 @keyframes privian-progress-animation {

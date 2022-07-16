@@ -1,27 +1,46 @@
-import { BadRequestError } from '$lib/api/errors';
-import type { ActionHandler, ActionSubmitResponse } from '$lib/types';
+import { BadRequestError } from '$lib/errors';
+import { readResponseBody } from '$lib/helpers';
+import { Api } from '$lib/api';
+import type { IAction } from '$lib/types';
 
 export class Actions {
-	static actions: Map<string, ActionHandler> = new Map();
+	static actions: Map<string, IAction> = new Map();
 
-	static register(cmd: string, handler: ActionHandler) {
-		this.actions.set(cmd, handler);
+	static register(action: IAction) {
+		this.actions.set(action.id, action);
 	}
 
-	static async get(cmd: string, params: Record<string, string>, locals: App.Locals) {
-		const handler = this.actions.get(cmd);
-		if (!handler?.get) {
-			throw new BadRequestError(`Unknown action '${cmd}'.`);
+	static get(actionId: string) {
+		const action = this.actions.get(actionId);
+		if (!action) {
+			throw new BadRequestError(`Unknown action '${actionId}'.`);
 		}
-		return handler.get.call(void 0, params, locals);
+		return action;
 	}
 
-	static async submit(cmd: string, params: Record<string, string>, data: Record<string, any>, locals: App.Locals): Promise<ActionSubmitResponse> {
-		const handler = this.actions.get(cmd);
-		if (!handler) {
-			throw new BadRequestError(`Unknown action '${cmd}'.`);
+	static async view(actionId: string, locals: App.Locals, params: Record<string, string>) {
+		const action = this.get(actionId);
+		if (!action.viewUrl) {
+			return null;
+		}	
+		return readResponseBody(await Api.get(action.api).request({
+			searchParams: params,
+			url: action.viewUrl,
+		}, locals));
+	}
+
+	static async submit(actionId: string, locals: App.Locals, params: Record<string, string>, data: Record<string, any>) {
+		const action = this.get(actionId);
+		if (!action.url) {
+			return null;
 		}
-		return handler.submit.call(void 0, params, data, locals);
+		return readResponseBody(await Api.get(action.api).request({
+			body: data,
+			method: action.method || 'POST',
+			searchParams: params,
+			url: action.url.replace(/\$(\w+)/g, (m, key) => {
+				return params[key] || m;
+			}),
+		}, locals));
 	}
-
 }

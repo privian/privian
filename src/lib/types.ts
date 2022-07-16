@@ -80,12 +80,11 @@ export interface ISearchOptions {
 }
 
 export interface ISearchResultItemAction {
-	confirm?: boolean | string;
 	icon?: string;
 	id: string;
-	instant?: boolean;
 	label: string;
 	parameters?: Record<string, string>;
+	tooltip?: string;
 }
 
 export interface ISearchResultItemMetadata {
@@ -165,41 +164,47 @@ export interface ISearchSuggestionsResult {
 	items?: ISearchSuggestionsResultItem[];
 }
 
-export interface ISearchActionFormField {
-	info?: string;
-	label?: string;
-	name: string;
-	placeholder?: string;
-	required?: boolean;
-	tooltip?: string;
-	type?: string;
-	value?: string;
-}
-
-export interface ISearchActionForm {
-	fields?: ISearchActionFormField[]
-}
-
-export interface ISearchAction {
-	form?: ISearchActionForm;
+export interface IAction {
+	api: string;
 	id: string;
-	snippet?: string;
-	title?: string;
-	subtitle?: string;
+	method?: string;
+	viewUrl?: string;
+	url?: string;
 }
 
-export type ActionHandler = {
-	get?: (params: Record<string, string>, locals: App.Locals) => ISearchAction;
-	submit: (params: Record<string, string>, data: Record<string, unknown>, locals: App.Locals) => Promise<ActionSubmitResponse>;
-};
+export interface IActionViewPrompt {
+	text: string;
+	title?: string;
+}
 
-export type ActionSubmitResponse = {
-	toast?: {
-		text?: string;
-		title?: string;
-		type?: string;
-	};
-} | void;
+export interface IActionView {
+	actions?: ISearchResultItemAction[];
+	form?: IForm;
+	id: string;
+	html?: string;
+	parameters?: Record<string, string>;
+	prompt?: IActionViewPrompt;
+	subtitle?: string;
+	title?: string;
+}
+
+export interface IToast {
+	text?: string;
+	title?: string;
+	type?: string;
+}
+
+export interface IActionResult {
+	toast?: IToast;
+}
+
+export interface ICommand {
+	api: string;
+	description?: string;
+	id: string;
+	method?: string;
+	url: string;
+}
 
 export interface ISearchQuery {
 	command: string | null;
@@ -245,4 +250,36 @@ export interface ITrendingItem {
 	footer?: string;
 	label: string;
 	related?: ITrendingItemRelated[];
+}
+
+export interface IRequestOptions {
+	body?: any;
+	cookies?: Record<string, string>;
+	headers?: Record<string, string>;
+	method?: string;
+	searchParams?: Record<string, string> | URLSearchParams;
+	timeout?: number;
+	url: string;
+	validateStatus?: boolean;
+}
+
+/**
+ * Form types
+ */
+
+export interface IFormField {
+	info?: string;
+	label?: string;
+	name: string;
+	options?: { label: string, value: string }[];
+	placeholder?: string;
+	readonly?: boolean;
+	required?: boolean;
+	tooltip?: string;
+	type?: string;
+	value?: string | string[];
+}
+
+export interface IForm {
+	fields?: IFormField[]
 }

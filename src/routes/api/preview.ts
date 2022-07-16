@@ -6,10 +6,10 @@ const PostInput = z.object({
   url: z.string().url(),
 });
 
-export const post = handleRequest<z.infer<typeof PostInput>>(async (_, data) => {
+export const post = handleRequest<z.infer<typeof PostInput>>(async ({ locals }, data) => {
 	let result: any;
 	try {
-		result = await Preview.preview(data.url);
+		result = await Preview.preview(data.url, locals);
 	} catch (err) {
 		console.log(err)
 	}
@@ -17,4 +17,6 @@ export const post = handleRequest<z.infer<typeof PostInput>>(async (_, data) => 
     status: 200,
     body: result,
   };
-}, PostInput);
+}, {
+	input: PostInput,
+});

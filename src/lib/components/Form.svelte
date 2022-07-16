@@ -3,10 +3,11 @@
 	import { invalidate } from '$app/navigation';
 	import ErrorMessage from '$lib/components/ErrorMessage.svelte';
 	import FormInput from '$lib/components/FormInput.svelte';
+	import type { IForm } from '$lib/types';
 
 	export let action: string;
 	export let errors: Record<string, string> = {};
-	export let fields: any[] | null = null;
+	export let form: IForm | null = null;
 	export let method: string = 'post';
 	export let invalidatePage: boolean = true;
 	export let loading: boolean = false;
@@ -19,7 +20,7 @@
 	$: error = errorJSON ? JSON.parse(errorJSON) : xhrError;
 	$: onError(error);
 
-	function getField(type: string) {
+	function getFieldComponent(type?: string) {
 		switch (type) {
 			default:
 				return FormInput;
@@ -82,18 +83,11 @@
 	<ErrorMessage {error} class="mb-6" />
 	{/if}
 
-	{#if fields}
-		{#each fields as field}
+	{#if form?.fields}
+		{#each form.fields as field}
 			<svelte:component
-				this={getField(field.type)}
-				info={field.info}
-				label={field.label || field.name}
-				name={field.name}
-				placeholder={field.placeholder}
-				readonly={loading}
-				required={field.required}
-				tooltip={field.tooltip}
-				value={field.value}
+				this={getFieldComponent(field.type)}
+				{field}
 			></svelte:component>
 		{/each}
 	{/if}

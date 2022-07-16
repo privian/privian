@@ -3,6 +3,13 @@
 // See https://kit.svelte.dev/docs/types#app
 // for information about these interfaces
 declare namespace App {
+	interface User {
+		avatar?: string;
+		id: string;
+		name?: string;
+		org?: string;
+		role?: string;
+	}
 	interface Locals {
 		multitenant: boolean;
 		jwt: string | null;
@@ -10,18 +17,12 @@ declare namespace App {
 		country: string;
 		safeSearch: boolean;
 		region: string;
-		user: {
-			id: string;
-			role: string;
-		} | null;
+		user: User | null;
 	}
 	// interface Platform {}
 	interface Session {
 		multitenant: boolean;
-		user: {
-			id: string;
-			role: string;
-		} | null;
+		user: User | null;
 	}
 	// interface Stuff {}
 }

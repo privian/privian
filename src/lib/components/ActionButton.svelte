@@ -1,39 +1,65 @@
 <script lang="ts">
 	import { page } from '$app/stores';
 	import { invalidate } from '$app/navigation';
-	import type { ISearchResultItem, ISearchResultItemAction } from '$lib/types';
-	import { actionId, actionParams, prompt, toast } from '$lib/stores';
+	import { actionView, prompt, toast } from '$lib/stores';
 	import Icon from '$lib/components/Icon.svelte';
+	import type { ISearchResultItemAction, IActionResult, IActionView } from '$lib/types';
 
 	export let action: ISearchResultItemAction;
-	export let item: ISearchResultItem | null = null;
 	export let ghost: boolean = false;
 
 	let error: string | null = null;
 	let loading: boolean = false;
 
-	function onClick() {
-		if (action.confirm) {
-			$prompt = {
-				handler: (ok: boolean) => {
-					if (ok) {
-						submit();
-					}
-				},
-				text: item?.title && typeof action.confirm === 'string' ? action.confirm.replace(/\%s/g, item.title) : action.confirm,
+	async function handleResponse<T>(resp: Response): Promise<T | null> {
+		let body: any;
+		if (resp.headers.get('content-type')?.includes('/json')) {
+			body = await resp.json();
+		}
+		if (resp.status > 400) {
+			throw new Error(body?.message || `Failed (${resp.status})`);
+		}
+		return body;
+	}
+
+	async function loadView() {
+		loading = true;
+		error = null;
+		try {
+			const resp = await fetch(`/api/action/${action.id}?${new URLSearchParams(action.parameters || {}).toString()}`);
+			const view = await handleResponse<IActionView>(resp);
+			if (view?.prompt?.text) {
+				$prompt = {
+					...view.prompt,
+					handler: (ok: boolean) => {
+						if (ok) {
+							submit();
+						}
+					},
+				};
+
+			} else if (view) {
+				$actionView = {
+					...view,
+					id: action.id,
+				};
+			} else {
+				return submit();
+			}
+
+		} catch (err: any) {
+			error = err?.message || err;
+			$toast = {
+				text: error,
+				type: 'error',
 			};
 
-		} else if (action.instant) {
-			submit();
-
-		} else {
-			$actionId = action.id;
-			$actionParams = action.parameters || null;
+		} finally {
+			loading = false;
 		}
 	}
 
 	async function submit() {
-		error = null;
 		loading = true;
 		try {
 			const resp = await fetch(`/api/action/${action.id}?${new URLSearchParams(action.parameters || {}).toString()}`, {
@@ -43,43 +69,34 @@
 				},
 				method: 'POST',
 			});
-			const data = resp.headers.get('content-type')?.includes('/json') ? await resp.json() : null;
-			if (resp.status >= 400) {
-				error = data?.message || `Failed (${resp.status})`;
-				$toast = {
-					text: error,
-					type: 'error',
-				};
-				return;
+			const result = await handleResponse<IActionResult>(resp);
+			if (result?.toast) {
+				$toast = result.toast;
 			}
-			if (data?.toast) {
-				$toast = data.toast;
-			}
-			await invalidate($page.url.toString());
 
-		} catch (err) {
-			error = String(err);
+		} catch (err: any) {
+			error = err?.message || err;
 			$toast = {
 				text: error,
 				type: 'error',
 			};
-			return;
 
 		} finally {
 			loading = false;
 		}
+		await invalidate($page.url.toString());
 	}
 </script>
 
-<div class="tooltip {$$restProps.class}" data-tip={error || action.label}>
+<span class="{$$restProps.class}" class:tooltip={!!action.tooltip || error} data-tip={error || action.tooltip}>
 	<a
 		href={`/action/${action.id}`}
-		class="btn btn-sm btn-primary"
+		class="btn btn-sm btn-primary flex flex-nowrap gap-2"
 		class:loading={loading}
-		class:btn-circle={!!action.icon}
+		class:btn-circle={!!action.icon && !action.label}
 		class:btn-outline={!ghost}
 		class:btn-ghost={ghost}
-		on:click|preventDefault={() => onClick()}
+		on:click|preventDefault={() => loadView()}
 		>
 		{#if error}
 			<Icon icon="error-warning-line" class="text-error" />
@@ -87,8 +104,9 @@
 			{#if !loading}
 			<Icon icon={action.icon} />
 			{/if}
-		{:else}
+		{/if}
+		{#if action.label}
 			<span>{action.label}</span>
 		{/if}
 	</a>
-</div>
+</span>

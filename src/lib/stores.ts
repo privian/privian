@@ -33,6 +33,7 @@ const defaultLanguage = get(locales).includes(navigatorLanguage!) ? navigatorLan
 
 export const actionId = writable<string | null>(null);
 export const actionParams = writable<Record<string, string> | null>(null);
+export const actionView = writable<any>(null);
 export const confirm = writable<string | null>(null);
 export const info = writable<ISearchResultItem | null>(null);
 export const language = persistentWritable<string>('language', defaultLanguage, (value) => setCookie('language', value, COOKIE_TTL));

@@ -4,6 +4,7 @@ import JWT from 'jsonwebtoken';
 import { sequence } from '@sveltejs/kit/hooks';
 import type { Handle, GetSession } from '@sveltejs/kit';
 import config from '$lib/config';
+import { Api } from '$lib/api';
 import { Providers } from '$lib/providers';
 
 const auth: Handle = async ({ event, resolve }) => {
@@ -23,8 +24,11 @@ const auth: Handle = async ({ event, resolve }) => {
 		if (decoded) {
 			event.locals.jwt = cookies[config.jwt?.cookieName];
 			event.locals.user = {
+				avatar: decoded.avatar,
 				id: decoded.sub!,
-				role: decoded.role!,
+				name: decoded.name,
+				org: decoded.org,
+				role: decoded.role,
 			};
 			return resolve(event);
 		}
@@ -43,6 +47,8 @@ export const getSession: GetSession = (event) => {
 		user: event?.locals?.user || null,
 	};
 }
+
+Api.load();
 
 Providers.load().catch((err) => {
 	console.log('Error loading providers: ', err);

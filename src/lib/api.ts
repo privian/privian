@@ -1,41 +1,80 @@
-import { GraphQLClient } from 'graphql-request';
-import { ApiError, AlreadyExistsError, NotFoundError, UnauthorizedError, ValidationError } from '$lib/api/errors';
-import type { IValidationErrorField } from '$lib/api/errors';
+import extend from 'just-extend';
+import config from '$lib/config';
+import { request } from '$lib/helpers';
+import { Actions } from '$lib/actions';
+import { Commands } from '$lib/commands';
+import type { IRequestOptions } from '$lib/types';
 
 export class Api {
-	static apis: Set<any> = new Set();
+	static readonly apis: Map<string, Api> = new Map();
 
-	static client = new GraphQLClient(`http://127.0.0.1:4000/graphql`, { headers: {} })
-
-	static async request<T>(query: string, variables?: Record<string, unknown>, locals?: App.Locals): Promise<T> {
-		const headers: Record<string, string> = {};
-		if (locals?.jwt) {
-			headers.authorization = `Bearer ${locals.jwt}`;
+	static async load() {
+		for (let { name, url } of config.apis) {
+			const api = new Api(name, url);
+			await api.loadDiscovery();
+			this.apis.set(name, api);
 		}
-		const resp = await this.client.request(query, variables, headers).catch((err) => {
-			console.log('Error', err)
-			return null;
-		});
-		const keys = Object.keys(resp);
-		// @ts-ignore
-		return keys.length === 1 ? this.handleResponse<T>(resp[keys[0]]) : keys.map((key) => this.handleResponse(resp[key]));
 	}
 
-	static handleResponse<T = unknown>(response: { __typename: string, fieldErrors?: IValidationErrorField[], data?: T, message?: string }): T {
-		switch (response?.__typename) {
-			case 'AlreadyExistsError':
-				throw new AlreadyExistsError(response.message);
-			case 'NotFoundError':
-				throw new NotFoundError(response.message);
-			case 'UnauthorizedError':
-				throw new UnauthorizedError(response.message);
-			case 'ZodError':
-				throw new ValidationError(response.fieldErrors!);
-			default:
-				if (response.data) {
-					return response.data;
-				}
-				throw new ApiError(response.message);
+	static get(name: string) {
+		const api = this.apis.get(name);
+		if (!api) {
+			throw new Error(`Unknown API '${name}'.`);
+		}
+		return api;
+	}
+
+	static getUploadApi() {
+		for (let [ name, api ] of this.apis) {
+			if (api.uploadUrl) {
+				return api;
+			}
+		}
+	}
+
+	uploadUrl?: string;
+
+	constructor(readonly name: string, readonly url: string) {
+	}
+
+	async request(options: IRequestOptions, locals: App.Locals) {
+		return request(extend(true, {
+			headers: {
+				'Authorization': locals.jwt ? `Bearer ${locals.jwt}` : '',
+				'X-Country': locals.country,
+				'X-Locale': locals.locale,
+				'X-Region': locals.region,
+				'X-User-Id': locals.user?.id || '',
+				'X-User-Role': locals.user?.role || '',
+			},
+		}, options, {
+			url: new URL(options.url, this.url).toString(),
+		}) as IRequestOptions);
+	}
+
+	async loadDiscovery() {
+		const resp = await request({
+			url: new URL('/_discovery', this.url).toString(),
+		});
+		const specs = await resp.json();
+		this.uploadUrl = specs.uploadUrl;
+		if (specs.actions) {
+			for (let action of specs.actions) {
+				Actions.register({
+					...action,
+					api: this.name,
+					url: `${this.url}${action.url}`,
+				});
+			}
+		}
+		if (specs.commands) {
+			for (let command of specs.commands) {
+				Commands.register({
+					...command,
+					api: this.name,
+					url: `${this.url}${command.url}`,
+				});
+			}
 		}
 	}
 }

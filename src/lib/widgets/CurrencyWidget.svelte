@@ -2,7 +2,7 @@
 	import { browser } from '$app/env';
 	import { onMount } from 'svelte';
 	import FormInput from '$lib/components/FormInput.svelte';
-	import LineChart from '$lib/components/LineChart2.svelte';
+	import LineChart from '$lib/components/LineChart.svelte';
 	import { formatCurrency, formatDate, formatNumber } from '$lib/format';
 	import type { ISearchResultItem } from '$lib/types';
 
@@ -37,7 +37,6 @@
 	$: updatedAt = rates[0]?.date;
 	$: item.subtitle = `${amount} ${formatCurrency(currencyFrom)}`;
 	$: onFromChange(currencyFrom);
-	// $: onItemOptionsChange(item.options);
 
 	onMount(() => {
 		if (browser) {
@@ -69,14 +68,6 @@
 		if (item?.subtitle) {
 			item.subtitle = `${amount} ${formatCurrency(currencyFrom)}`;
 		}
-	}
-
-	function onItemOptionsChange(options: ISearchResultItem['options']) {
-		console.log('>> item')
-		amount = parseFloat(item.options?.amount || '1');
-		currencyFrom = item.options?.from || 'USD';
-		currencyTo = item.options?.to || 'EUR';
-		result = parseFloat(item.options?.result || '1');
 	}
 
 	async function loadRates() {
@@ -116,7 +107,15 @@
 		{#if browser}
 		<div class="flex gap-2 mb-2">
 			<div class="w-1/2">
-				<FormInput name="from" numeric bind:value={amount} />
+				<FormInput
+					field={{
+						label: '',
+						name: 'from',
+					}}
+					numeric
+					lazz={false}
+					bind:value={amount}
+				/>
 			</div>
 			<div class="w-1/2">
 				<select class="select select-bordered w-full max-w-xs" bind:value={currencyFrom}>
@@ -129,7 +128,14 @@
 
 		<div class="flex gap-2">
 			<div class="w-1/2">
-				<FormInput name="to" numeric value={result} />
+				<FormInput
+					field={{
+						label: '',
+						name: 'to',
+					}}
+					numeric
+					value={result}
+				/>
 			</div>
 			<div class="w-1/2">
 				<select class="select select-bordered w-full max-w-xs" bind:value={currencyTo}>

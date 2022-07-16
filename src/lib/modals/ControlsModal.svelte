@@ -116,8 +116,8 @@
     </div>
 
     <div class="modal-action bg-gray-100">
-      <label for="my-modal" class="btn btn-ghost rounded-none" on:click={() => close()}>Cancel</label>
-      <label for="my-modal" class="btn btn-primary rounded-none">Confirm</label>
+      <label for="" class="btn btn-ghost rounded-none" on:click={() => close()}>Cancel</label>
+      <label for="" class="btn btn-primary rounded-none">Confirm</label>
     </div>
   </div>
 </div>

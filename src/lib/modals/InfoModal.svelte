@@ -109,6 +109,6 @@
 	{/if}
 
 	<div slot="actions">
-		<label for="my-modal" class="btn btn-ghost rounded-none" on:click={() => $info = null}>{$_('action.close')}</label>
+		<label for="" class="btn btn-ghost rounded-none" on:click={() => $info = null}>{$_('action.close')}</label>
 	</div>
 </Modal>

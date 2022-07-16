@@ -35,19 +35,23 @@
 
 		<FormInput
 		 	class="mb-3"
-			label={$_('label.email')}
-			name="email"
-			type="email"
-			placeholder={$_('placeholder.email')}
+			field={{
+				label: $_('label.email'),
+				name: 'email',
+				type: 'email',
+				placeholder: $_('placeholder.email'),
+				required: true,
+			}}
 			error={errors.email}
-			required
 		/>
 		<FormInput
-			label={$_('label.password')}
-			name="password"
-			type="password"
+			field={{
+				label: $_('label.password'),
+				name: 'password',
+				type: 'password',
+				required: true,
+			}}
 			error={errors.password}
-			required
 		/>
 
 		<div class="mt-6">

@@ -1,39 +1,37 @@
-import { BadRequestError } from '$lib/api/errors';
-import type { ISearchResult, ISearchQuery, ISearchSuggestionsResultItem } from '$lib/types';
-
-type CommandHandler = ((locals: App.Locals) => Promise<ISearchResult>);
-
-interface ICommandOptions {
-	label: string;
-	handler: CommandHandler;
-}
+import { BadRequestError } from '$lib/errors';
+import { Api } from '$lib/api';
+import type { ICommand, ISearchQuery, ISearchSuggestionsResultItem } from '$lib/types';
 
 export class Commands {
-	static commands: Map<string, ICommandOptions> = new Map();
+	static commands: Map<string, ICommand> = new Map();
 
-	static register(cmd: string, options: ICommandOptions) {
-		this.commands.set(cmd, options);
+	static register(cmd: ICommand) {
+		this.commands.set(cmd.id, cmd);
 	}
 
-	static async handle(cmd: string, locals: App.Locals): Promise<ISearchResult> {
-		const options = this.commands.get(cmd);
-		if (!options?.handler) {
-			throw new BadRequestError(`Unknown command '${cmd}'.`);
+	static async invoke(command: string, locals: App.Locals) {
+		const cmd = this.commands.get(command);
+		if (!cmd) {
+			throw new BadRequestError(`Unknown command '${command}'.`);
 		}
-		return options.handler.call(void 0, locals);
+		const resp = await Api.get(cmd.api).request({
+			method: cmd.method,
+			url: cmd.url,
+		}, locals);
+		return resp.json();
 	}
 
 	static suggest(query: ISearchQuery, maxItems: number = 20) {
 		const items: ISearchSuggestionsResultItem[] = [];
-		for (let [ command, options ] of this.commands) {
+		for (let [ id, options ] of this.commands) {
 			if (
 				query.term === '/'
-				|| (query.command && command.startsWith(query.command))
-				|| (query.term && command.startsWith(query.term))
+				|| (query.command && id.startsWith(query.command))
+				|| (query.term && id.startsWith(query.term))
 			) {
 				items.push({
-					command,
-					label: options.label,
+					command: id,
+					label: options.description || '',
 				});
 			}
 		}

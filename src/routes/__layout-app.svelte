@@ -8,32 +8,28 @@
 				redirect: '/login'
 			};
 		}
-		return {
-			props: {
-				user: session.user
-			}
-		};
+		return {};
 	}
 </script>
 
 <script lang="ts">
 	import { browser } from '$app/env';
 	import { page } from '$app/stores';
-	import { actionId, actionParams, lightroom, scrolled, previewModalEnabled } from '$lib/stores';
+	import { actionId, actionParams, actionView, lightroom, scrolled, previewModalEnabled } from '$lib/stores';
 	import Pins from '$lib/components/Pins.svelte';
 	import Footer from '$lib/components/Footer.svelte';
 	import Header from '$lib/components/Header.svelte';
 	import Drawer from '$lib/components/Drawer.svelte';
 	import Toasts from '$lib/components/Toasts.svelte';
 	import Lightroom from '$lib/components/Lightroom.svelte';
-	import ActionModal from '$lib/modals/ActionModal.svelte';
+	import ActionModal from '$lib/modals/ActionViewModal.svelte';
 	import InfoModal from '$lib/modals/InfoModal.svelte';
 	import PromptModal from '$lib/modals/PromptModal.svelte';
 	import SerpPreviewModal from '$lib/modals/SerpPreviewModal.svelte';
+	import '$lib/i18n';
 	import 'remixicon/fonts/remixicon.css'
 	import '../prism.css';
 	import '../app.scss';
-	import '$lib/i18n';
 
 	let elContent: HTMLElement;
 
@@ -87,7 +83,7 @@
   </div>
 </div>
 
-<ActionModal bind:actionId={$actionId} bind:actionParams={$actionParams} />
+<ActionModal bind:actionView={$actionView} />
 <InfoModal />
 <PromptModal />
 <Toasts />

@@ -26,6 +26,8 @@ export class Google {
 
 	static readonly RESULTS_PER_PAGE = 50;
 
+	static readonly USER_AGENT = `Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/101.0.4951.41 Safari/537.3`;
+
 	static readonly cookies: Record<string, string> = {};
 
 	static readonly cacheSuggestions = new Cache<ISearchSuggestionsResultItem[]>({
@@ -81,11 +83,17 @@ export class Google {
 		}
 		let items = await this.cacheSuggestions.get([locals.locale, query.term]);
 		if (!items) {
-			const resp = await request(this.URL_SUGGESTIONS, {
-				client: 'gws-wiz',
-				xssi: 't',
-				hl: locals.region.split(/[\-\_]/)[0],
-				q: query.term,
+			const resp = await request({
+				headers: {
+					'User-Agent': this.USER_AGENT,
+				},
+				searchParams: {
+					client: 'gws-wiz',
+					xssi: 't',
+					hl: locals.region.split(/[\-\_]/)[0],
+					q: query.term,
+				},
+				url: this.URL_SUGGESTIONS,
 			});
 			const text = await resp.text();
 			const json = JSON.parse(text.replace(/^\)\]\}\'/, ''));
@@ -138,8 +146,14 @@ export class Google {
 			if (options?.filter) {
 				searchParams.set('tbs', this.buildFilterParam(options.filter));
 			}
-			const resp = await request(url.toString(), searchParams, {
+			const resp = await request({
 				cookies: this.cookies,
+				headers: {
+					'User-Agent': this.USER_AGENT,
+				},
+				searchParams,
+				url: url.toString(),
+				validateStatus: false,
 			});
 			if (resp.status === 429) {
 				if (scope.captcha || !config.puppeteer.executablePath) {

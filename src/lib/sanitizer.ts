@@ -1,5 +1,4 @@
 import sanitizeHtml from 'sanitize-html';
-import { decodeHTML } from 'entities';
 
 const TAG_REG_EXP = /\<\w+[^\>]{0,}\>/;
 

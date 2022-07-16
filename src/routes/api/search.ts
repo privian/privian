@@ -20,10 +20,12 @@ export const post = handleRequest<z.infer<typeof PostInput>>(async ({ locals }, 
   if (!isHXR) {
     const preview = result?.items?.find(({ preview }, i) => i < 6 && !!preview);
     if (preview) {
-      result.preview = await Preview.preview(preview.link!);
+      result.preview = await Preview.preview(preview.link!, locals);
     }
   }
   return {
 		body: result,
   };
-}, PostInput);
+}, {
+  input: PostInput,
+});
